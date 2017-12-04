@@ -1,6 +1,9 @@
+@import url('https://fonts.googleapis.com/css?family=Luckiest+Guy|Paytone+One|Sorts+Mill+Goudy');
+
 body {
   font: 14px "Century Gothic", Futura, sans-serif;
   margin: 20px;
+  background-color:rgb(163, 205, 245);
 }
 
 ol {
@@ -20,16 +23,18 @@ ol {
 
 h1 {
   text-align:center; 
-  font-family: 'Roboto';
-  font-size: 3rem;
+  font-family: 'Sorts Mill Goudy';
+  font-size: 4rem;
 }
 
 
 
 .square {
   background: white;
-  color: black;
-  border: 2px solid #0e4a7c;
+  font-family: 'Luckiest Guy';
+  color: rgb(20, 24, 44);
+  border: #0e4a7c;
+  border-style:outset;
   float: left;
   font-size: 3rem;
   font-weight: 450;
@@ -52,6 +57,8 @@ h1 {
 }
 
 .gameResult {
+  color: rgb(9, 52, 245);
+  font-family: 'Paytone One';
   font-weight: bold;
   font-size:3rem;
 }
@@ -73,7 +80,7 @@ h1 {
 }
 
 button {
-  background-color: rgb(47, 55, 77); /* Green */
+  background-color: #027EB2;
   color: white;
   padding: 6px 8px;
   display: inline-block;

@@ -74,7 +74,7 @@ class Game extends React.Component {
     }
     squares[i] = humanPlayer;
     // setTimeout(() =>{
-      squares[aiPick] = this.state.computer;
+      squares[aiPick] = aiPlayer;
     // }, 250)
   
     console.log(squares.length);
