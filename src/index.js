@@ -2,8 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 
-const humanPlayer = 'X';
-const aiPlayer = 'O';
+
 const size = 4;
 
 function Square(props) {
@@ -13,7 +12,6 @@ function Square(props) {
     </button>
   );
 }
-
 
 class Board extends React.Component {
 
@@ -37,7 +35,7 @@ class Board extends React.Component {
       mappedSquares.push(<div key={square} className="board-row">{squares}</div>);
     }
     return (
-      <div class="board">
+      <div className="board">
         {mappedSquares}
       </div>
     );
@@ -53,17 +51,15 @@ class Game extends React.Component {
         col: null,
         row: null,
       }],
-      human: null,
-      computer: null,
       stepNumber: 0,
       xIsNext: true,
       movesAscending: true,
     };
   }
 
-
-
   handleClick(i) {
+    const humanPlayer = this.state.human;
+    const aiPlayer = this.state.computer;
     const history = this.state.history.slice(0, this.state.stepNumber + 1);
     const current = history[history.length - 1];
     const squares = current.squares.slice();
@@ -77,7 +73,10 @@ class Game extends React.Component {
       return
     }
     squares[i] = humanPlayer;
-    squares[aiPick] = aiPlayer;
+    // setTimeout(() =>{
+      squares[aiPick] = this.state.computer;
+    // }, 250)
+  
     console.log(squares.length);
     this.setState({
       history: history.concat([{
@@ -90,16 +89,18 @@ class Game extends React.Component {
     });
   }
 
-
-
-  onClick(i) {
-    this.handleClick(i);
-    this.computerPick();
-  }
-
   computerPick() {
-    
   }
+
+  setSymbol = (symbol) => {
+    alert("The game has begun :D enjoy");
+    this.setState({
+      squares: Array(9).fill(null),
+      symbolPicked: true,
+      human: symbol,
+      computer: symbol === "X" ? "O" : "X"
+    });
+  };
 
   jumpTo(step) {
     this.setState({
@@ -114,9 +115,17 @@ class Game extends React.Component {
     })
   }
 
+  onClick(i) {
+    if (this.state.symbolPicked) {
+      this.handleClick(i);
+    }
+    this.computerPick();
+  }
+
 
   render() {
     const history = this.state.history;
+    const start = this.state.gameStarted;
     const current = history[this.state.stepNumber];
     const winner = calculateWinner(current.squares);
 
@@ -126,7 +135,8 @@ class Game extends React.Component {
         'Go to game start';
       return (
         <li key={move}>
-          <button className={move === this.state.stepNumber ? "currentMove" : ""} onClick={() => this.jumpTo(move)}>{desc}</button>
+          <button className={move === this.state.stepNumber ? "currentMove" : ""}
+            onClick={() => this.jumpTo(move)}>{desc}</button>
         </li>
       );
     });
@@ -136,16 +146,19 @@ class Game extends React.Component {
     }
 
     let status;
-    let draw;
     let bold;
     if (winner) {
-      status = 'Winner: ' + current.squares[winner[0]];
+      status = current.squares[winner[0]] === this.state.human ? "YOU WON!" : "YOU LOSE!";
       bold = true;
     } else if (winner === false) {
       status = 'TIE GAME!!!!';
       bold = true;
+    } else if (!this.state.symbolPicked) {
+      status = <div className="setSymbol">Player one pick <button
+        onClick={() => this.setSymbol("X")}> X </button> <span>or </span>
+        <button onClick={() => this.setSymbol("O")}> O </button> ? </div>
     } else {
-      status = 'Next player: ' + (this.state.xIsNext ? humanPlayer : aiPlayer);
+      status = 'You Picked: ' + this.state.human;
     }
 
     return (
@@ -160,7 +173,7 @@ class Game extends React.Component {
           />
           <button onClick={() => this.toggleMoves()}>Reorder Moves</button>
           <div className="game-info">
-            <li>{moves}</li>
+            <ol>{moves}</ol>
           </div>
         </div>
       </div>
@@ -193,6 +206,39 @@ function calculateWinner(squares, player) {
   }
   return null;
 }
+
+// function wins(board, player) {
+//   if (
+//     (board[0] == player && board[1] == player && board[2] == player) ||
+//     (board[3] == player && board[4] == player && board[5] == player) ||
+//     (board[6] == player && board[7] == player && board[8] == player) ||
+//     (board[0] == player && board[3] == player && board[6] == player) ||
+//     (board[1] == player && board[4] == player && board[7] == player) ||
+//     (board[2] == player && board[5] == player && board[8] == player) ||
+//     (board[0] == player && board[4] == player && board[8] == player) ||
+//     (board[2] == player && board[4] == player && board[6] == player)
+//   ) {
+//     return true;
+//   } else {
+//     return false;
+//   }
+// }
+
+// function emptyIndexies(board){
+//   return  board.filter(squares => squares != "O" && squares != "X");
+// }
+
+// let freeSquares = emptyIndexies(board);
+
+// if (win(cloneBoard, humanPlayer)) {
+//   return { score: -10 };
+// }
+// else if (winning(cloneBoard, aiPlayer)) {
+//   return { score: 10 };
+// }
+// else if (freeSquares.length === 0) {
+//   return { score: 0 };
+// }
 
 ReactDOM.render(
 
