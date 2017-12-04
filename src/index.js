@@ -1,211 +1,201 @@
-//********************************************************************
-//File:	        index.js    
-//Author:       Thomas Reeves
-//Date:	        2017-11-19
-//Course:       Applied Javascript
-//
-//Problem Statement:
-// 1. Display the location for each move in the format (col, row) in the move history list. 
-// 2. Bold the currently selected item in the move list. 
-// 3. Rewrite Board to use two loops to make the squares instead of hardcoding them.
-// 4. Add a toggle button that lets you sort the moves in either ascending or descending order.
-// 5. When someone wins, highlight the three squares that caused the win.
-
-//Inputs:	User's key clicks  
-//Outputs:	Tic Tac toe game
-// 
-
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 
-
-const NUM_ROWS = 3;
-const NUM_CELLS = 3;
+const humanPlayer = 'X';
+const aiPlayer = 'O';
+const size = 4;
 
 function Square(props) {
-  if (props.highlight) { // if else if highlight is true background is yellow if not default white
-    return (
-      <button className="square" style={{backgroundColor:"yellow"}} onClick={props.onClick}>
-        {props.value}
-      </button>
-    );
-  } else { 
-    return (
-      <button className="square" onClick={props.onClick}>
-        {props.value}
-      </button>
-    );
-  }
-  }
-  
-  class Board extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-          squares: Array(9).fill(null),
-          xIsNext: true,
-        };
-      }
+  return (
+    <button className={"square" + (props.winningSquare ? " winner" : "")} onClick={props.onClick}>
+      {props.value}
+    </button>
+  );
+}
 
-      renderSquare(i) {
-        let won = false;
-        if (this.props.winningSquares && this.props.winningSquares.indexOf(i) >= 0) {    
-          won = true;
-       }
-       // if a winning square set highlight to true if not default to false
-       return <Square key={i} value={this.props.squares[i]} highlight={won} onClick={() => this.props.onClick(i)} />;
-    }
-  
-    render() {
-      var board = [];
-      var cells = [];
-      var cellPos = 0;
-      for (var index = 0; index < NUM_ROWS; index++) { // loop for # of rows
-        for (var cell = 0; cell < NUM_CELLS; cell++) { // loop for # of cells per row
-          cells.push(this.renderSquare(cellPos))
-          cellPos++; 
+
+class Board extends React.Component {
+
+  renderSquare(i) {
+    return <Square key={i}
+      value={this.props.squares[i]}
+      winningSquare={this.props.winner && this.props.winner.indexOf(i) !== -1}
+      onClick={() => this.props.onClick(i)}
+    />;
+  }
+
+  render() {
+    const mappedSquares = Array(size * size).fill(null);
+    let square = 0;
+    for (let i = 0; i < size; i++) {
+      const squares = Array(size).fill(null);
+      for (let j = 0; j < size; j++) {
+        square = size * i + j;
+        squares[square] = this.renderSquare(square);
       }
-        board.push(<div key={index} className="board-row">{ cells }</div>)
-        cells = []; //clears array after main loop so it doesn't make 9 columns
+      mappedSquares.push(<div key={square} className="board-row">{squares}</div>);
     }
     return (
-      <div>
-        {board}
-      </div>     
-    )
+      <div class="board">
+        {mappedSquares}
+      </div>
+    );
   }
 }
-  
-  class Game extends React.Component {
-    constructor(props) {
-      super(props);
-      this.state = {
-        history: [{
-          squares: Array(9).fill(null),
-        }],
-         stepNumber: 0,
-        xIsNext: true,
-      };
+
+class Game extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      history: [{
+        squares: Array(size * size).fill(null),
+        col: null,
+        row: null,
+      }],
+      human: null,
+      computer: null,
+      stepNumber: 0,
+      xIsNext: true,
+      movesAscending: true,
+    };
+  }
+
+
+
+  handleClick(i) {
+    const history = this.state.history.slice(0, this.state.stepNumber + 1);
+    const current = history[history.length - 1];
+    const squares = current.squares.slice();
+    var aiPick = Math.floor(Math.random() * squares.length);
+    while (squares[aiPick] === "X" || squares[aiPick] === 'O') {
+      aiPick = Math.floor(Math.random() * squares.length);
     }
-
-    handleClick(i) {
-      const history = this.state.history.slice(0, this.state.stepNumber + 1);
-      const current = history[history.length - 1];
-      const squares = current.squares.slice();
-      if (calculateWinner(squares) || squares[i]) {
-          return
-        }
-        squares[i] = this.state.xIsNext ? 'X' : 'O';
-        this.setState({
-          history: history.concat([{
-            squares: squares,
-            position: squares[i]
-          }]),
-          stepNumber: history.length,
-          xIsNext: !this.state.xIsNext,
-        });
-      }
-
-    jumpTo(step) {
-        this.setState({
-          stepNumber: step,
-          xIsNext: (step % 2) === 0,
-        });
+    const col = i % size;
+    const row = Math.floor(i / size);
+    if (calculateWinner(squares) || squares[i]) {
+      return
     }
+    squares[i] = humanPlayer;
+    squares[aiPick] = aiPlayer;
+    console.log(squares.length);
+    this.setState({
+      history: history.concat([{
+        squares: squares,
+        col: col,
+        row: row
+      }]),
+      stepNumber: history.length,
+      xIsNext: !this.state.xIsNext,
+    });
+  }
 
-    sortMoves() { // function to handle sorted
-      const sorted = this.state.sorted;
-      this.setState({
-        sorted: !sorted,
-      });
-    }
 
-    render() {
-      const history = this.state.history;
-      const current = history[this.state.stepNumber];
-      const win = calculateWinner(current.squares);
 
-      const moves = history.map((step, move) => {
-        const desc = move ?
-          'Go to move #'  + move : //gave up Q_Q history.position 
-          'Go to game start';
-          if ( move === this.state.stepNumber ){ // if current move bolds
-        return (
-          <li key={move}>
-            <button onClick={() => this.jumpTo(move)}><b>{desc}</b></button>
-          </li>
-        );
-      }
-      else {
-        return (
-          <li key={move}>
-            <button onClick={() => this.jumpTo(move)}>{desc}</button>
-          </li>
-      );
-      }
-      });
-  
-      let status;
-      let winningSquares;
-      if (win) {
-        status = 'Winner: ' + win.winner ;
-        winningSquares = win.winningSquares;
-        //console.log(win.winningSquares);
-      } else {
-        status = 'Next player: ' + (this.state.xIsNext ? 'X' : 'O');
-      }
+  onClick(i) {
+    this.handleClick(i);
+    this.computerPick();
+  }
 
+  computerPick() {
+    
+  }
+
+  jumpTo(step) {
+    this.setState({
+      stepNumber: step,
+      xIsNext: (step % 2) === 0,
+    });
+  }
+
+  toggleMoves() {
+    this.setState({
+      movesAscending: !this.state.movesAscending
+    })
+  }
+
+
+  render() {
+    const history = this.state.history;
+    const current = history[this.state.stepNumber];
+    const winner = calculateWinner(current.squares);
+
+    const moves = history.map((step, move) => {
+      const desc = move ?
+        'Go to move #' + move + " at position: (" + step.col + ", " + step.row + ")" :
+        'Go to game start';
       return (
-        <div className="game">
-          <div className="game-board">
+        <li key={move}>
+          <button className={move === this.state.stepNumber ? "currentMove" : ""} onClick={() => this.jumpTo(move)}>{desc}</button>
+        </li>
+      );
+    });
+
+    if (!this.state.movesAscending) {
+      moves.reverse();
+    }
+
+    let status;
+    let draw;
+    let bold;
+    if (winner) {
+      status = 'Winner: ' + current.squares[winner[0]];
+      bold = true;
+    } else if (winner === false) {
+      status = 'TIE GAME!!!!';
+      bold = true;
+    } else {
+      status = 'Next player: ' + (this.state.xIsNext ? humanPlayer : aiPlayer);
+    }
+
+    return (
+      <div className="game">
+        <div className="game-board">
+          <h1>{"Tic Tac Toe"}</h1>
+          <div className={bold ? "gameResult" : "info"}> {status}</div>
           <Board
+            winner={winner}
             squares={current.squares}
-            winningSquares = {winningSquares}
-            onClick={(i) => this.handleClick(i)}
+            onClick={(i) => this.onClick(i)}
           />
-            
-          </div>
+          <button onClick={() => this.toggleMoves()}>Reorder Moves</button>
           <div className="game-info">
-            <div>{status}</div>
-            <button onClick={() => this.sortMoves()}> Sort </button>
-            {(() => this.state.sorted === true?
-            // inline conditonal with true / false for sorting
-            <ol>{moves.reverse()}</ol> : <ol>{moves}</ol>) ()} 
+            <li>{moves}</li>
           </div>
         </div>
-      );
-    }
+      </div>
+    );
   }
-  
-  // ========================================
+}
 
-  function calculateWinner(squares) {
-    const lines = [
-      [0, 1, 2],
-      [3, 4, 5],
-      [6, 7, 8],
-      [0, 3, 6],
-      [1, 4, 7],
-      [2, 5, 8],
-      [0, 4, 8],
-      [2, 4, 6],
-    ];
-    for (let i = 0; i < lines.length; i++) {
-      const [a, b, c] = lines[i];
-      if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-        return {
-         // returns objects so i can call the properties
-         winner: squares[a],
-         winningSquares: lines[i]
-        }
-      }
+// ========================================
+function calculateWinner(squares, player) {
+  const lines = [
+    [0, 1, 2, 3],
+    [4, 5, 6, 7],
+    [8, 9, 10, 11],
+    [12, 13, 14, 15],
+    [0, 4, 8, 12],
+    [1, 5, 9, 13],
+    [2, 6, 10, 14],
+    [3, 7, 11, 15],
+    [0, 5, 10, 15],
+    [12, 9, 6, 3],
+  ];
+  for (let i = 0; i < lines.length; i++) {
+    const [a, b, c, d] = lines[i];
+    if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c] && squares[a] === squares[d]) {
+      return [a, b, c, d];
     }
-    return null;
+    if (squares.indexOf(null) === -1) {
+      return false;
+    }
   }
-  
-  ReactDOM.render(
-    <Game />,
-    document.getElementById('root')
-  );
-  
+  return null;
+}
+
+ReactDOM.render(
+
+  <Game />,
+  document.getElementById('root')
+);
