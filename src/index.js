@@ -78,19 +78,18 @@ class Game extends React.Component {
     const current = history[history.length - 1];
     const squares = current.squares.slice();
     var aiPick = Math.floor(Math.random() * squares.length);
-    while (squares[aiPick] === "X" || squares[aiPick] === 'O') {
-      aiPick = Math.floor(Math.random() * squares.length);
-    }
     const col = (i % size) + 1;
     const row = Math.floor(i / size) + 1;
     if (calculateWinner(squares) || squares[i]) {
       return
     }
-
     if (this.state.twoPlayer) {
       squares[i] = this.state.xIsNext ? "X" : "O";
     } else {
       squares[i] = humanPlayer;
+      while (squares[aiPick] === "X" || squares[aiPick] === 'O') {
+        aiPick = Math.floor(Math.random() * squares.length);
+      }
       squares[aiPick] = aiPlayer;
     }
 
