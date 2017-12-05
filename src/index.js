@@ -52,23 +52,23 @@ class Game extends React.Component {
         row: null,
       }],
       stepNumber: 0,
-      start:false,
+      start: false,
       xIsNext: true,
       movesAscending: true,
     };
   }
-  
+
   playerVersusPlayer() {
     this.setState({
-     start:true,
-     twoPlayer: true
+      start: true,
+      twoPlayer: true
     });
   }
 
-  playAgainstAi(){
+  playAgainstAi() {
     this.setState({
-     start:true
-     });
+      start: true
+    });
   }
 
   handleClick(i) {
@@ -86,14 +86,16 @@ class Game extends React.Component {
     if (calculateWinner(squares) || squares[i]) {
       return
     }
+
     if (this.state.twoPlayer) {
-    squares[i] = this.state.xIsNext ? "X" : "O";
+      squares[i] = this.state.xIsNext ? "X" : "O";
+    } else {
+      squares[i] = humanPlayer;
+      squares[aiPick] = aiPlayer;
     }
-    else {
-    squares[i] = humanPlayer;
-    squares[aiPick] = aiPlayer;
-    }
+
     console.log(squares.length);
+
     this.setState({
       history: history.concat([{
         squares: squares,
@@ -106,7 +108,7 @@ class Game extends React.Component {
   }
 
   setSymbol(symbol) {
-    alert("The game has begun :D enjoy");
+    alert("The board is set click any square to begin.");
     this.setState({
       squares: Array(size * size).fill(null),
       symbolPicked: true,
@@ -160,54 +162,56 @@ class Game extends React.Component {
     let bold;
     if (winner) {
       status = current.squares[winner[0]] === this.state.human ? "YOU WON!" : "YOU LOSE!";
-      if(this.state.twoPlayer) {
+      if (this.state.twoPlayer) {
         status = current.squares[winner[0]] === this.state.human ? "Player 1 won!!" : "Player 2 won";
       }
       bold = true;
     } else if (winner === false) {
-      status = 'Stalemate!!!!';
+      status = 'Stalemate!!!!!!!';
       bold = true;
     } else if (!this.state.symbolPicked) {
       status = <div className="setSymbol">Player one pick <button className="uiButton"
         onClick={() => this.setSymbol("X")}> X </button> <span>or </span>
         <button className="uiButton" onClick={() => this.setSymbol("O")}> O </button> ? </div>
     } else {
-      if(this.state.twoPlayer) {
-      status = this.state.xIsNext ? "Player 1 move " + this.state.human : "Player 2 move " + this.state.computer; 
+      if (this.state.twoPlayer) {
+        status = this.state.xIsNext ? "Player 1 move " + this.state.human : "Player 2 move " + this.state.computer;
       }
       else {
-      status = 'You Picked: ' + this.state.human;
+        status = 'You Picked: ' + this.state.human;
       }
     }
 
-    if(this.state.start) {
-    return (
-      <div className="game">
-        <div className="game-board">
-          <h1>{"Tic Tac Toe"}</h1> 
-          <div className={bold ? "gameResult" : "info"}> {status}</div>
-          <Board
-            winner={winner}
-            squares={current.squares}
-            onClick={(i) => this.onClick(i)}
-          />
-          <button className="uiButton" onClick={() => this.toggleMoves()}>Reorder Moves</button>
+    if (this.state.start) {
+      return (
+
+        <div className="game">
           <div className="game-info">
             <ol>{moves}</ol>
           </div>
+          <div className="game-board">
+            <h1>{"Tic Tac Toe"}</h1>
+            <div className={bold ? "gameResult" : "info"}> {status}</div>
+            <Board
+              winner={winner}
+              squares={current.squares}
+              onClick={(i) => this.onClick(i)}
+            />
+            <button className="uiButton" onClick={() => this.toggleMoves()}>Reorder Moves</button>
+          </div>
         </div>
-      </div>
-    );
-  } else {
-    return (
-      <div id="startBtns">
-         <h1>{"Tic Tac Toe"}</h1>
-         <h4>Pick how you want to play the game :D</h4> 
-      <button className="startBtn" onClick={() => this.playerVersusPlayer()}>Player vs Player</button>
-      <button className="startBtn" onClick={() => this.playAgainstAi()}>Play against Ai</button>
-      </div>
-    )
-  }
+
+      );
+    } else {
+      return (
+        <div id="startBtns">
+          <h1>{"Tic Tac Toe"}</h1>
+          <h4>Pick how you want to play the game :D</h4>
+          <button className="startBtn" onClick={() => this.playerVersusPlayer()}>Player vs Player</button>
+          <button className="startBtn" onClick={() => this.playAgainstAi()}>Player vs AI</button>
+        </div>
+      )
+    }
   }
 }
 
