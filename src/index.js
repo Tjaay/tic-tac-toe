@@ -52,9 +52,23 @@ class Game extends React.Component {
         row: null,
       }],
       stepNumber: 0,
+      start:false,
       xIsNext: true,
       movesAscending: true,
     };
+  }
+  
+  playerVersusPlayer() {
+    this.setState({
+     start:true,
+     twoPlayer: true
+    });
+  }
+
+  playAgainstAi(){
+    this.setState({
+     start:true
+     });
   }
 
   handleClick(i) {
@@ -67,16 +81,18 @@ class Game extends React.Component {
     while (squares[aiPick] === "X" || squares[aiPick] === 'O') {
       aiPick = Math.floor(Math.random() * squares.length);
     }
-    const col = i % size;
-    const row = Math.floor(i / size);
+    const col = (i % size) + 1;
+    const row = Math.floor(i / size) + 1;
     if (calculateWinner(squares) || squares[i]) {
       return
     }
+    if (this.state.twoPlayer) {
+    squares[i] = this.state.xIsNext ? "X" : "O";
+    }
+    else {
     squares[i] = humanPlayer;
-    // setTimeout(() =>{
-      squares[aiPick] = aiPlayer;
-    // }, 250)
-  
+    squares[aiPick] = aiPlayer;
+    }
     console.log(squares.length);
     this.setState({
       history: history.concat([{
@@ -89,13 +105,10 @@ class Game extends React.Component {
     });
   }
 
-  computerPick() {
-  }
-
-  setSymbol = (symbol) => {
+  setSymbol(symbol) {
     alert("The game has begun :D enjoy");
     this.setState({
-      squares: Array(9).fill(null),
+      squares: Array(size * size).fill(null),
       symbolPicked: true,
       human: symbol,
       computer: symbol === "X" ? "O" : "X"
@@ -119,13 +132,11 @@ class Game extends React.Component {
     if (this.state.symbolPicked) {
       this.handleClick(i);
     }
-    this.computerPick();
   }
 
 
   render() {
     const history = this.state.history;
-    const start = this.state.gameStarted;
     const current = history[this.state.stepNumber];
     const winner = calculateWinner(current.squares);
 
@@ -135,7 +146,7 @@ class Game extends React.Component {
         'Go to game start';
       return (
         <li key={move}>
-          <button className={move === this.state.stepNumber ? "currentMove" : ""}
+          <button className={"uiButton " + (move === this.state.stepNumber ? "currentMove" : "")}
             onClick={() => this.jumpTo(move)}>{desc}</button>
         </li>
       );
@@ -149,40 +160,59 @@ class Game extends React.Component {
     let bold;
     if (winner) {
       status = current.squares[winner[0]] === this.state.human ? "YOU WON!" : "YOU LOSE!";
+      if(this.state.twoPlayer) {
+        status = current.squares[winner[0]] === this.state.human ? "Player 1 won!!" : "Player 2 won";
+      }
       bold = true;
     } else if (winner === false) {
-      status = 'TIE GAME!!!!';
+      status = 'Stalemate!!!!';
       bold = true;
     } else if (!this.state.symbolPicked) {
-      status = <div className="setSymbol">Player one pick <button
+      status = <div className="setSymbol">Player one pick <button className="uiButton"
         onClick={() => this.setSymbol("X")}> X </button> <span>or </span>
-        <button onClick={() => this.setSymbol("O")}> O </button> ? </div>
+        <button className="uiButton" onClick={() => this.setSymbol("O")}> O </button> ? </div>
     } else {
+      if(this.state.twoPlayer) {
+      status = this.state.xIsNext ? "Player 1 move " + this.state.human : "Player 2 move " + this.state.computer; 
+      }
+      else {
       status = 'You Picked: ' + this.state.human;
+      }
     }
 
+    if(this.state.start) {
     return (
       <div className="game">
         <div className="game-board">
-          <h1>{"Tic Tac Toe"}</h1>
+          <h1>{"Tic Tac Toe"}</h1> 
           <div className={bold ? "gameResult" : "info"}> {status}</div>
           <Board
             winner={winner}
             squares={current.squares}
             onClick={(i) => this.onClick(i)}
           />
-          <button onClick={() => this.toggleMoves()}>Reorder Moves</button>
+          <button className="uiButton" onClick={() => this.toggleMoves()}>Reorder Moves</button>
           <div className="game-info">
             <ol>{moves}</ol>
           </div>
         </div>
       </div>
     );
+  } else {
+    return (
+      <div id="startBtns">
+         <h1>{"Tic Tac Toe"}</h1>
+         <h3>Pick how you want to play the game :D</h3> 
+      <button className="startBtn" onClick={() => this.playerVersusPlayer()}>Player vs Player</button>
+      <button className="startBtn" onClick={() => this.playAgainstAi()}>Play against Ai</button>
+      </div>
+    )
+  }
   }
 }
 
 // ========================================
-function calculateWinner(squares, player) {
+function calculateWinner(squares) {
   const lines = [
     [0, 1, 2, 3],
     [4, 5, 6, 7],
@@ -207,22 +237,6 @@ function calculateWinner(squares, player) {
   return null;
 }
 
-// function wins(board, player) {
-//   if (
-//     (board[0] == player && board[1] == player && board[2] == player) ||
-//     (board[3] == player && board[4] == player && board[5] == player) ||
-//     (board[6] == player && board[7] == player && board[8] == player) ||
-//     (board[0] == player && board[3] == player && board[6] == player) ||
-//     (board[1] == player && board[4] == player && board[7] == player) ||
-//     (board[2] == player && board[5] == player && board[8] == player) ||
-//     (board[0] == player && board[4] == player && board[8] == player) ||
-//     (board[2] == player && board[4] == player && board[6] == player)
-//   ) {
-//     return true;
-//   } else {
-//     return false;
-//   }
-// }
 
 // function emptyIndexies(board){
 //   return  board.filter(squares => squares != "O" && squares != "X");
