@@ -28,7 +28,7 @@ h1 {
   font-size: 4rem;
 }
 
-h3 {
+h4 {
   text-align:center;
 }
 
@@ -113,8 +113,9 @@ button:hover {
 }
 
 .startBtn {
-  margin-left:5px;
-  text-align:center;
+ 
+  margin-left:20px;
+  
 }
 
 

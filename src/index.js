@@ -202,7 +202,7 @@ class Game extends React.Component {
     return (
       <div id="startBtns">
          <h1>{"Tic Tac Toe"}</h1>
-         <h3>Pick how you want to play the game :D</h3> 
+         <h4>Pick how you want to play the game :D</h4> 
       <button className="startBtn" onClick={() => this.playerVersusPlayer()}>Player vs Player</button>
       <button className="startBtn" onClick={() => this.playAgainstAi()}>Play against Ai</button>
       </div>
