@@ -138,7 +138,9 @@ class Game extends React.Component {
   resetBoard() {
     this.setState({
       gameStart: !this.state.gameStart,
-      boardSet: !this.state.boardSet
+      boardSet: !this.state.boardSet,
+      symbolPicked: !this.state.symbolPicked,
+      twoPlayer: !this.state.twoPlayer
     })
     this.jumpTo(0);
   }
