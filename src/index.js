@@ -53,11 +53,13 @@ class Game extends React.Component {
       }],
       stepNumber: 0,
       gameStart: false,
-      boardSet:false,
+      boardSet: false,
       xIsNext: true,
       movesAscending: true,
     };
   }
+
+
 
   playerVersusPlayer() {
     this.setState({
@@ -90,12 +92,7 @@ class Game extends React.Component {
       squares[i] = this.state.xIsNext ? "X" : "O";
     } else {
       squares[i] = playerOnePlayer;
-      if (squares[i] != null) {
-        while (squares[aiPick] === "X" || squares[aiPick] === 'O') {
-          aiPick = Math.floor(Math.random() * squares.length);
-        }
-        squares[aiPick] = aiPlayer;
-      }
+        this.computerPick(squares, aiPick, aiPlayer)
     }
 
     console.log(squares.length);
@@ -110,6 +107,16 @@ class Game extends React.Component {
       stepNumber: history.length,
       xIsNext: !this.state.xIsNext,
     });
+  }
+
+  computerPick(squares, aiPick, aiPlayer) {
+
+
+    while (squares[aiPick] === "X" || squares[aiPick] === 'O') {
+      aiPick = Math.floor(Math.random() * squares.length);
+    }
+    squares[aiPick] = aiPlayer;
+
   }
 
   setSymbol(symbol) {
@@ -140,7 +147,7 @@ class Game extends React.Component {
       gameStart: !this.state.gameStart,
       boardSet: !this.state.boardSet,
       symbolPicked: !this.state.symbolPicked,
-      twoPlayer: !this.state.twoPlayer
+      twoPlayer: false
     })
     this.jumpTo(0);
   }
