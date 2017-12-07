@@ -89,7 +89,7 @@ class Game extends React.Component {
     }
 
     if (this.state.twoPlayer) {
-      squares[i] = this.state.xIsNext ? "X" : "O";
+      squares[i] = this.state.xIsNext ? this.state.playerOne : this.state.playerTwo;
     } else {
       squares[i] = playerOnePlayer;
         this.computerPick(squares, aiPick, aiPlayer)
