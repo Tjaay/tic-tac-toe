@@ -52,7 +52,7 @@ class Game extends React.Component {
         row: null,
       }],
       stepNumber: 0,
-      start: false,
+      gameStart: false,
       xIsNext: true,
       movesAscending: true,
     };
@@ -60,37 +60,41 @@ class Game extends React.Component {
 
   playerVersusPlayer() {
     this.setState({
-      start: true,
+      gameStart: true,
       twoPlayer: true
     });
   }
 
   playAgainstAi() {
     this.setState({
-      start: true
+      gameStart: true
     });
   }
 
   handleClick(i) {
-    const humanPlayer = this.state.human;
-    const aiPlayer = this.state.computer;
+    const playerOnePlayer = this.state.playerOne;
+    const aiPlayer = this.state.playerTwo;
     const history = this.state.history.slice(0, this.state.stepNumber + 1);
     const current = history[history.length - 1];
     const squares = current.squares.slice();
-    var aiPick = Math.floor(Math.random() * squares.length);
+    let aiPick = Math.floor(Math.random() * squares.length);
     const col = (i % size) + 1;
     const row = Math.floor(i / size) + 1;
+
     if (calculateWinner(squares) || squares[i]) {
       return
     }
+
     if (this.state.twoPlayer) {
       squares[i] = this.state.xIsNext ? "X" : "O";
     } else {
-      squares[i] = humanPlayer;
-      while (squares[aiPick] === "X" || squares[aiPick] === 'O') {
-        aiPick = Math.floor(Math.random() * squares.length);
+      squares[i] = playerOnePlayer;
+      if (squares[i] != null) {
+        while (squares[aiPick] === "X" || squares[aiPick] === 'O') {
+          aiPick = Math.floor(Math.random() * squares.length);
+        }
+        squares[aiPick] = aiPlayer;
       }
-      squares[aiPick] = aiPlayer;
     }
 
     console.log(squares.length);
@@ -111,8 +115,8 @@ class Game extends React.Component {
     this.setState({
       squares: Array(size * size).fill(null),
       symbolPicked: true,
-      human: symbol,
-      computer: symbol === "X" ? "O" : "X"
+      playerOne: symbol,
+      playerTwo: symbol === "X" ? "O" : "X"
     });
   };
 
@@ -126,6 +130,12 @@ class Game extends React.Component {
   toggleMoves() {
     this.setState({
       movesAscending: !this.state.movesAscending
+    })
+  }
+
+  resetBoard(){
+    this.setState({
+      gameStart: !this.state.gameStart
     })
   }
 
@@ -159,55 +169,66 @@ class Game extends React.Component {
 
     let status;
     let bold;
+    // if someone wins the game
     if (winner) {
-      status = current.squares[winner[0]] === this.state.human ? "YOU WON!" : "YOU LOSE!";
       if (this.state.twoPlayer) {
-        status = current.squares[winner[0]] === this.state.human ? "Player 1 won!!" : "Player 2 won";
+        status = current.squares[winner[0]] === this.state.playerOne ? "Player 1 won!!" : "Player 2 won";
+      } else {
+        status = current.squares[winner[0]] === this.state.playerOne ? "YOU WON!" : "YOU LOSE!";
       }
       bold = true;
+
+      // if noone wins the game
     } else if (winner === false) {
       status = 'Stalemate!!!!!!!';
       bold = true;
+
+
     } else if (!this.state.symbolPicked) {
       status = <div className="setSymbol">Player one pick <button className="uiButton"
         onClick={() => this.setSymbol("X")}> X </button> <span>or </span>
         <button className="uiButton" onClick={() => this.setSymbol("O")}> O </button> ? </div>
+
     } else {
       if (this.state.twoPlayer) {
-        status = this.state.xIsNext ? "Player 1 move " + this.state.human : "Player 2 move " + this.state.computer;
+        status = this.state.xIsNext ? "Player 1 move " + this.state.playerOne : "Player 2 move " + this.state.playerTwo;
       }
       else {
-        status = 'You Picked: ' + this.state.human;
+        status = 'You Picked: ' + this.state.playerOne;
       }
     }
 
-    if (this.state.start) {
+    if (this.state.gameStart) {
       return (
-
-        <div className="game">
-          <div className="game-info">
-            <ol>{moves}</ol>
-          </div>
-          <div className="game-board">
-            <h1>{"Tic Tac Toe"}</h1>
-            <div className={bold ? "gameResult" : "info"}> {status}</div>
-            <Board
-              winner={winner}
-              squares={current.squares}
-              onClick={(i) => this.onClick(i)}
-            />
-            <button className="uiButton" onClick={() => this.toggleMoves()}>Reorder Moves</button>
+        <div>
+          <div className="game">
+            <div className="game-info">
+              <ol>{moves}</ol>
+            </div>
+            <div className="game-board">
+              <h1>{"Tic Tac Toe"}</h1>
+              <div>
+                <p className={this.state.symbolPicked ? "noHowToWin" : "hasHowToWin"}> To win get 4 in a row, horizontally,
+                <br /> vertically, or in a diagonal </p>
+              </div>
+              <div className={bold ? "gameResult" : "info"}> {status}</div>
+              <Board
+                winner={winner}
+                squares={current.squares}
+                onClick={(i) => this.onClick(i)}
+              />
+              <button className="uiButton" onClick={() => this.toggleMoves()}>Reorder Moves</button>
+              <button className="resetBtn" onClick={() => this.resetBoard()}>Change Game Type</button>
+            </div>
           </div>
         </div>
-
       );
     } else {
       return (
         <div id="startBtns">
           <h1>{"Tic Tac Toe"}</h1>
-          <h4>Pick how you want to play the game :D</h4>
-          <button className="startBtn" onClick={() => this.playerVersusPlayer()}>Player vs Player</button>
-          <button className="startBtn" onClick={() => this.playAgainstAi()}>Player vs AI</button>
+          <button className="startBtn" onClick={() => this.playerVersusPlayer()}>Play vs Friend</button>
+          <button className="startBtn" onClick={() => this.playAgainstAi()}>Play vs Computer</button>
         </div>
       )
     }
@@ -247,7 +268,7 @@ function calculateWinner(squares) {
 
 // let freeSquares = emptyIndexies(board);
 
-// if (win(cloneBoard, humanPlayer)) {
+// if (win(cloneBoard, playerOnePlayer)) {
 //   return { score: -10 };
 // }
 // else if (winning(cloneBoard, aiPlayer)) {
