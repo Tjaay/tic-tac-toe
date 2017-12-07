@@ -53,6 +53,7 @@ class Game extends React.Component {
       }],
       stepNumber: 0,
       gameStart: false,
+      boardSet:false,
       xIsNext: true,
       movesAscending: true,
     };
@@ -100,6 +101,7 @@ class Game extends React.Component {
     console.log(squares.length);
 
     this.setState({
+      boardSet: true,
       history: history.concat([{
         squares: squares,
         col: col,
@@ -133,10 +135,12 @@ class Game extends React.Component {
     })
   }
 
-  resetBoard(){
+  resetBoard() {
     this.setState({
-      gameStart: !this.state.gameStart
+      gameStart: !this.state.gameStart,
+      boardSet: !this.state.boardSet
     })
+    this.jumpTo(0);
   }
 
   onClick(i) {
@@ -203,7 +207,7 @@ class Game extends React.Component {
         <div>
           <div className="game">
             <div className="game-info">
-              <ol>{moves}</ol>
+              <ol>{this.state.boardSet ? moves : ""}</ol>
             </div>
             <div className="game-board">
               <h1>{"Tic Tac Toe"}</h1>
