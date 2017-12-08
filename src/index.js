@@ -1,3 +1,19 @@
+//********************************************************************
+//File:	        index.js      
+//Author:       Thomas Reeves
+//Date:	        2017-12-07
+//Course:       IMG250
+//
+//Problem Statement:
+// 1. Added game start screen where you can pick game mode
+// 2. Option to pick symbol at start of game and adjust the game accordingly
+// 3. If noone can win board will now display appriopiate message
+// 4. Dumb Ai mode using random generator to pick squares to fill in
+// 5. Made the game board 4x4 
+// 6. Functonality added to reset the board and switch game modes.
+// 
+//********************************************************************
+
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
@@ -52,6 +68,7 @@ class Game extends React.Component {
         row: null,
       }],
       stepNumber: 0,
+      isDraw: false,
       gameStart: false,
       boardSet: false,
       xIsNext: true,
@@ -59,12 +76,10 @@ class Game extends React.Component {
     };
   }
 
-
-
   playerVersusPlayer() {
     this.setState({
       gameStart: true,
-      twoPlayer: true
+      isTwoPlayer: true
     });
   }
 
@@ -75,7 +90,7 @@ class Game extends React.Component {
   }
 
   handleClick(i) {
-    const playerOnePlayer = this.state.playerOne;
+    const playerOne = this.state.playerOne;
     const aiPlayer = this.state.playerTwo;
     const history = this.state.history.slice(0, this.state.stepNumber + 1);
     const current = history[history.length - 1];
@@ -84,15 +99,15 @@ class Game extends React.Component {
     const col = (i % size) + 1;
     const row = Math.floor(i / size) + 1;
 
-    if (calculateWinner(squares) || squares[i]) {
+    if (this.calculateWinner(squares) || squares[i]) {
       return
     }
 
-    if (this.state.twoPlayer) {
+    if (this.state.isTwoPlayer) {
       squares[i] = this.state.xIsNext ? this.state.playerOne : this.state.playerTwo;
-    } else {
-      squares[i] = playerOnePlayer;
-        this.computerPick(squares, aiPick, aiPlayer)
+    } else { // if vs ai
+      squares[i] = playerOne;
+      this.computerPick(squares, aiPick, aiPlayer)
     }
 
     console.log(squares.length);
@@ -147,7 +162,7 @@ class Game extends React.Component {
       gameStart: !this.state.gameStart,
       boardSet: !this.state.boardSet,
       symbolPicked: !this.state.symbolPicked,
-      twoPlayer: false
+      isTwoPlayer: false
     })
     this.jumpTo(0);
   }
@@ -158,11 +173,36 @@ class Game extends React.Component {
     }
   }
 
+  calculateWinner(squares) {
+    const lines = [
+      [0, 1, 2, 3],
+      [4, 5, 6, 7],
+      [8, 9, 10, 11],
+      [12, 13, 14, 15],
+      [0, 4, 8, 12],
+      [1, 5, 9, 13],
+      [2, 6, 10, 14],
+      [3, 7, 11, 15],
+      [0, 5, 10, 15],
+      [12, 9, 6, 3],
+    ];
+    for (let i = 0; i < lines.length; i++) {
+      const [a, b, c, d] = lines[i];
+      if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c] && squares[a] === squares[d]) {
+        return [a, b, c, d];
+      }
+    }
+    if (squares.indexOf(null) === -1) {
+      this.state.isDraw = true;
+    }
+    return null;
+  }
+
 
   render() {
     const history = this.state.history;
     const current = history[this.state.stepNumber];
-    const winner = calculateWinner(current.squares);
+    const winner = this.calculateWinner(current.squares);
 
     const moves = history.map((step, move) => {
       const desc = move ?
@@ -184,7 +224,7 @@ class Game extends React.Component {
     let bold;
     // if someone wins the game
     if (winner) {
-      if (this.state.twoPlayer) {
+      if (this.state.isTwoPlayer) {
         status = current.squares[winner[0]] === this.state.playerOne ? "Player 1 won!!" : "Player 2 won";
       } else {
         status = current.squares[winner[0]] === this.state.playerOne ? "YOU WON!" : "YOU LOSE!";
@@ -192,10 +232,12 @@ class Game extends React.Component {
       bold = true;
 
       // if noone wins the game
-    } else if (winner === false) {
+    } else if (this.state.isDraw) {
       status = 'Stalemate!!!!!!!';
       bold = true;
-
+      // this.setState would not work react with crash with a limit to prevent infinte loops.
+      //  i just mutated state directly which would not crash.
+      this.state.isDraw = false;
 
     } else if (!this.state.symbolPicked) {
       status = <div className="setSymbol">Player one pick <button className="uiButton"
@@ -203,7 +245,7 @@ class Game extends React.Component {
         <button className="uiButton" onClick={() => this.setSymbol("O")}> O </button> ? </div>
 
     } else {
-      if (this.state.twoPlayer) {
+      if (this.state.isTwoPlayer) {
         status = this.state.xIsNext ? "Player 1 move " + this.state.playerOne : "Player 2 move " + this.state.playerTwo;
       }
       else {
@@ -248,31 +290,11 @@ class Game extends React.Component {
   }
 }
 
-// ========================================
-function calculateWinner(squares) {
-  const lines = [
-    [0, 1, 2, 3],
-    [4, 5, 6, 7],
-    [8, 9, 10, 11],
-    [12, 13, 14, 15],
-    [0, 4, 8, 12],
-    [1, 5, 9, 13],
-    [2, 6, 10, 14],
-    [3, 7, 11, 15],
-    [0, 5, 10, 15],
-    [12, 9, 6, 3],
-  ];
-  for (let i = 0; i < lines.length; i++) {
-    const [a, b, c, d] = lines[i];
-    if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c] && squares[a] === squares[d]) {
-      return [a, b, c, d];
-    }
-    if (squares.indexOf(null) === -1) {
-      return false;
-    }
-  }
-  return null;
-}
+ReactDOM.render(
+
+  <Game />,
+  document.getElementById('root')
+);
 
 
 // function emptyIndexies(board){
@@ -290,9 +312,3 @@ function calculateWinner(squares) {
 // else if (freeSquares.length === 0) {
 //   return { score: 0 };
 // }
-
-ReactDOM.render(
-
-  <Game />,
-  document.getElementById('root')
-);
