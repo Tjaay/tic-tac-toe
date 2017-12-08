@@ -90,7 +90,7 @@ class Game extends React.Component {
   }
 
   handleClick(i) {
-    const playerOne = this.state.playerOne;
+    const playerOnePick = this.state.playerOne;
     const aiPlayer = this.state.playerTwo;
     const history = this.state.history.slice(0, this.state.stepNumber + 1);
     const current = history[history.length - 1];
@@ -106,7 +106,7 @@ class Game extends React.Component {
     if (this.state.isTwoPlayer) {
       squares[i] = this.state.xIsNext ? this.state.playerOne : this.state.playerTwo;
     } else { // if vs ai
-      squares[i] = playerOne;
+      squares[i] = playerOnePick;
       this.computerPick(squares, aiPick, aiPlayer)
     }
 
@@ -125,13 +125,10 @@ class Game extends React.Component {
   }
 
   computerPick(squares, aiPick, aiPlayer) {
-
-
     while (squares[aiPick] === "X" || squares[aiPick] === 'O') {
       aiPick = Math.floor(Math.random() * squares.length);
     }
     squares[aiPick] = aiPlayer;
-
   }
 
   setSymbol(symbol) {
